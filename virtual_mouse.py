@@ -2,10 +2,18 @@ import cv2
 import mediapipe as mp
 import pyautogui
 
+# variable cam akan mengaktifkan kamera ketika dijalankan
 cam = cv2.VideoCapture(0)
+# hand_detector akn mendetect tangan yang tertangkap pada cam
 hand_detector = mp.solutions.hands.Hands()
+
+# drawing_utils berfungsi untuk menggambar landmark pada tangan
 drawing_utils = mp.solutions.drawing_utils
+
+# size layar akan menyesuaikan dari size pyautogui
 screen_width, screen_height = pyautogui.size()
+
+# index_y menyimpan posisi vertikal sementara untuk jari telunjuk
 index_y = 0
 
 while True:
@@ -16,19 +24,27 @@ while True:
     output = hand_detector.process(rgb_frame)
     hands = output.multi_hand_landmarks
     
+    
+    # if hands akan bekerja ketika ada tangan yang terdeteksi di kamera
     if hands:
+        # for hand in hands akan me looping setiap tangan yang terdeteksi
         for hand in hands:
             drawing_utils.draw_landmarks(frame, hand)
             landmarks = hand.landmark
+            
+            # for id akan mendeteksi jari telunjuk, dan menghitung koordinat x dan y
             for id, landmarks in enumerate(landmarks):
                 x = int(landmarks.x*frame_width)
                 y = int(landmarks.y*frame_height)
                 
+                # id 8 adalah id untuk ujung jari telunjuk, func dibawah ini akn memindahkan posisi mouse ke koordinat dari id 8 tersebut
                 if id == 8:
                     cv2.circle(img=frame, center=(x, y), radius=20, color=(0, 255, 255))
                     index_x = screen_width/frame_width*x
                     index_y = screen_height/frame_height*y
                     pyautogui.moveTo(index_x, index_y)
+                    
+                # id 4 merupakan id dari ujung jari jempol(ibu jari), func ini akan melakukan click setiap ujung jari jempol bersentuhan dengan ujung jari telunjuk
                 if id == 4:
                     cv2.circle(img=frame, center=(x, y), radius=20, color=(0, 255, 255))
                     thumb_x = screen_width/frame_width*x
